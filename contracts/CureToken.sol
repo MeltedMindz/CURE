@@ -115,6 +115,7 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     // - Mint/burn operations
     // - Uniswap v4 pool operations (midSwap == true)
     // - Internal buyback swaps (internalSwap == true)
+    // - Contract transferring to burn address (whitelisted)
     function _update(
         address from,
         address to,
@@ -122,8 +123,10 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     ) internal override {
         bool isMint = from == address(0);
         bool isBurn = to == address(0) || to == BURN_ADDRESS;
+        // Allow contract to transfer directly to burn address (for buyback burns)
+        bool isContractBurn = from == address(this) && to == BURN_ADDRESS;
 
-        if (!isMint && !isBurn) {
+        if (!isMint && !isBurn && !isContractBurn) {
             // Allow transfers only if:
             // - we're in a Uniswap v4 pool operation (midSwap), or
             // - we're in an internal buyback swap (internalSwap)
