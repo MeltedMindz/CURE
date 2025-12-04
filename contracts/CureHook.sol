@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import {BaseHook} from "@uniswap/v4-periphery/src/utils/BaseHook.sol";
 import {Hooks} from "@uniswap/v4-core/src/libraries/Hooks.sol";
@@ -29,7 +29,16 @@ contract CureHook is BaseHook, ReentrancyGuard {
     IPoolManager public immutable manager;
     ICureTokenMinimal public immutable cureToken;
 
-    uint256 public deploymentBlock;
+    // Pool-specific deployment blocks (per Uniswap v4 best practices)
+    // A single hook contract can service multiple pools, so state must be pool-specific
+    mapping(PoolId => uint256) public deploymentBlocks;
+    
+    /// @notice Get the deployment block for a specific pool
+    /// @param poolId The pool ID to query
+    /// @return The block number when the pool was initialized, or 0 if not initialized
+    function getDeploymentBlock(PoolId poolId) external view returns (uint256) {
+        return deploymentBlocks[poolId];
+    }
 
     event HookFee(
         bytes32 indexed poolId,
@@ -84,20 +93,22 @@ contract CureHook is BaseHook, ReentrancyGuard {
             "CureHook: currency0 not ETH"
         );
 
-        if (deploymentBlock == 0) {
-            deploymentBlock = block.number;
+        PoolId poolId = key.toId();
+        if (deploymentBlocks[poolId] == 0) {
+            deploymentBlocks[poolId] = block.number;
         }
 
         return BaseHook.beforeInitialize.selector;
     }
 
     // ─── Fee calculation ───
-    function _calculateFeeBips() internal view returns (uint128) {
-        if (deploymentBlock == 0) {
+    function _calculateFeeBips(PoolId poolId) internal view returns (uint128) {
+        uint256 poolDeploymentBlock = deploymentBlocks[poolId];
+        if (poolDeploymentBlock == 0) {
             return FINAL_FEE_BIPS;
         }
 
-        uint256 blocksPassed = block.number - deploymentBlock;
+        uint256 blocksPassed = block.number - poolDeploymentBlock;
         uint256 maxReducible = STARTING_FEE_BIPS - FINAL_FEE_BIPS; // 9800
         uint256 reduction = blocksPassed * BIPS_PER_BLOCK;
 
@@ -152,6 +163,8 @@ contract CureHook is BaseHook, ReentrancyGuard {
         // Safe absolute value: handle edge case where ethDelta is minimum int128 (-2^127)
         // The absolute value of type(int128).min is 2^127, which cannot fit in int128
         // So we calculate the absolute value directly in uint256
+        PoolId poolId = key.toId();
+        
         uint256 ethAmount;
         if (ethDelta < 0) {
             if (ethDelta == type(int128).min) {
@@ -167,15 +180,20 @@ contract CureHook is BaseHook, ReentrancyGuard {
             // Positive value: convert directly to uint256
             ethAmount = uint256(uint128(ethDelta));
         }
-        uint128 feeBips = _calculateFeeBips();
+        
+        uint128 feeBips = _calculateFeeBips(poolId);
         uint256 feeAmount = (ethAmount * feeBips) / TOTAL_BIPS;
 
+        // Return delta: negative because we're taking ETH from the pool
+        // When afterSwapReturnDelta is true, we must return the delta for currency0 (ETH)
+        int128 returnDelta = 0;
+        
         if (feeAmount > 0) {
             // Take ETH from pool into this hook
             manager.take(ETH_CURRENCY, address(this), feeAmount);
 
             emit HookFee(
-                PoolId.unwrap(key.toId()),
+                PoolId.unwrap(poolId),
                 sender,
                 uint128(feeAmount),
                 feeBips
@@ -186,12 +204,16 @@ contract CureHook is BaseHook, ReentrancyGuard {
                 abi.encodeWithSelector(ICureTokenMinimal.addFees.selector)
             );
             require(ok, "CureHook: addFees failed");
+            
+            // Return negative delta: we took feeAmount from currency0 (ETH)
+            // This must be negative to account for the ETH we removed from the pool
+            returnDelta = -int128(int256(feeAmount));
         }
 
         // Turn off midSwap now that swap is over
         cureToken.setMidSwap(false);
 
-        return (BaseHook.afterSwap.selector, int128(int256(uint256(feeAmount))));
+        return (BaseHook.afterSwap.selector, returnDelta);
     }
 
     receive() external payable {}
