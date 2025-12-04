@@ -223,4 +223,62 @@ This is an experimental project. Use at your own risk. Always conduct thorough a
 
 ---
 
+## 🎗️ Donation Impact Based on Trading Volume
+
+CURE automatically donates 0.495% of all trading volume to St. Jude Children's Research Hospital—forever, with no team rake and no dev allocation.
+
+Every dollar donated is matched by an equal dollar used to buy back and burn CURE, reducing supply and strengthening holders' positions.
+
+Below are real-world examples of how much CURE donates at different average daily trading volumes.
+
+### 💵 Scenario 1 — $100,000 Daily Volume
+
+If CURE averages $100,000 traded per day, the protocol donates:
+
+- $495 per day
+- ≈ $3,465 per week
+- ≈ $15,000 per month
+- ≈ $180,675 per year
+
+Buyback + burn receives the same: $180,675 yearly.
+
+**Total annual economic impact: ≈ $361,350** (donation + burn pressure)
+
+### 💵 Scenario 2 — $500,000 Daily Volume
+
+Donation flow at this volume:
+
+- $2,475 per day
+- ≈ $17,325 per week
+- ≈ $74,250 per month
+- ≈ $903,375 per year
+
+Buyback + burn also receives $903,375 per year.
+
+**Total annual economic impact: ≈ $1,806,750**
+
+### 💵 Scenario 3 — $1,000,000 Daily Volume
+
+Donation totals:
+
+- $4,950 per day
+- ≈ $34,650 per week
+- ≈ $148,500 per month
+- ≈ $1,806,750 per year
+
+Buyback + burn again receives $1,806,750 per year.
+
+**Total annual economic impact: ≈ $3,613,500**
+
+### 🎗️ Why This Matters
+
+- **No team tax**
+- **No treasury cuts**
+- **No hidden rake**
+- **100% of all fees go directly to donation or burn — always.**
+
+CURE turns normal crypto trading volume into real-world cancer research funding while simultaneously strengthening the token through continual buyback and burn pressure.
+
+---
+
 **CURE Token**: Where every trade fights cancer. Where every swap funds research. Where profit meets purpose.
