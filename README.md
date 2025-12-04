@@ -1,84 +1,111 @@
-# CURE Token - PvPvE Uniswap v4 Experiment
+# CURE Token - Where Trading Meets Impact
 
-$CURE is a PvPvE experiment. On-chain, players fight each other for entries, exits, and a 1% caller reward. Under the hood, every trade skims ETH that is forced to both buy back and burn the token and donate an equal amount of value to St. Jude. For every dollar that benefits holders, a dollar goes to fight cancer.
+**Every trade. Every swap. Every moment of market activity becomes a force for good.**
 
-## Overview
+CURE is a revolutionary token that proves cryptocurrency can be both profitable and purposeful. Built on Uniswap v4, CURE transforms the competitive energy of DeFi trading into direct, measurable impact: **for every dollar that benefits token holders, a dollar goes to St. Jude Children's Research Hospital to fight childhood cancer.**
 
-CURE is a token built on Uniswap v4 with a unique PvPvE (Player vs Player vs Environment) mechanism that combines competitive trading with charitable giving.
+This isn't charity at the expense of returns. This is a new economic model where profit and purpose are perfectly aligned.
 
-### Core Properties
+## The Vision
 
-#### Uniswap v4 Based Tax
-- Single official CURE/ETH v4 pool with a custom hook (`CureHook`)
-- Hook skims ETH as a fee on every swap (no ERC20 transfer tax)
-- Fee starts at **99%** on both buys and sells
-- Decays by **1% per block** until it hits **1%**, where it stays forever
+Cryptocurrency has the power to move billions, but too often, that value stays locked in speculative markets. CURE changes that. Every trade generates fees that are automatically split: half creates value for holders through buybacks and burns, half funds life-saving research at one of the world's leading pediatric cancer centers.
 
-#### ETH-Only Fees
-- Fees are taken in ETH, not in CURE tokens
-- No sell pressure from the contract
-- `CureHook` sends ETH to the token contract via `addFees()` or `receive()`
+**The result?** A self-sustaining mechanism where the competitive drive of traders—the same force that creates volatility and opportunity—becomes the engine that funds real-world change.
 
-#### PvPvE Split: Equal Value to Holders and Charity
-- `CureToken` accumulates ETH from the hook
-- Anyone can call `processFees()`:
-  - **1%** caller reward (in ETH) paid to `msg.sender`
-  - Remaining **99%** of ETH is split:
-    - **50%** → swap ETH → USDC → sent to St. Jude Children's Research Hospital (0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2)
-    - **50%** → swap ETH → CURE → burn (send to `0x000000000000000000000000000000000000dEaD`)
-- **For every unit of value used to buy back and burn CURE (benefiting holders), the same unit of value is donated to charity.**
+## How It Works
 
-#### No Wallet-to-Wallet Transfers
-- `CureToken` overrides `_update` and blocks all non-mint, non-burn transfers unless `midSwap` flag is set
-- Only the Uniswap v4 hook can toggle this `midSwap` flag via `setMidSwap(true/false)`
-- This means:
-  - ❌ No wallet-to-wallet transfers
-  - ❌ No arbitrary routers / side DEXes
-  - ❌ No one can create a side pool (can't move tokens without the hook)
+### The Trading Mechanism
 
-#### Time-Distributed Buybacks
-- `processFees()` does not always use 100% of the ETH in the contract
-- Amount of ETH that can be used per call is a function of:
-  - Blocks elapsed since last `processFees()` call
-  - Constant `BUYBACK_PERIOD_BLOCKS` (100 blocks)
-- Over roughly `BUYBACK_PERIOD_BLOCKS` blocks, repeated calls gradually flush the full ETH buffer
-- Makes buybacks time-distributed and harder to game in a single transaction
-- Still permissionless and bot-callable
+CURE operates on a single, official Uniswap v4 pool with a custom hook that captures ETH fees on every swap. The design is elegant in its simplicity:
 
-#### Pure Degen Design
-- No multisig controlling transfers
-- No vesting contracts
-- No staking contracts
-- The only "special" on-chain actor is the Uniswap v4 hook address
-- Ownership may optionally be renounced once configuration is finalized
+1. **Fee Collection**: Every swap in the CURE/ETH pool generates an ETH fee
+   - Fee starts at 99% and decays by 1% per block until reaching 1% (where it stays)
+   - Fees are taken in ETH, not CURE tokens—no sell pressure on the token itself
 
-## Architecture
+2. **Automatic Processing**: Anyone can call `processFees()` to process accumulated ETH
+   - 1% goes to the caller as a reward (incentivizing regular processing)
+   - 99% is split equally:
+     - **50%** → Swapped to USDC → Sent directly to St. Jude Children's Research Hospital
+     - **50%** → Swapped to CURE → Permanently burned, reducing supply and benefiting holders
 
-### Contracts
+3. **The Balance**: This creates a perfect equilibrium where holder value and charitable impact grow in lockstep. As trading volume increases, both the token's value and the donations to St. Jude increase proportionally.
+
+### Why This Matters
+
+Traditional charity tokens often sacrifice holder value for donations, or vice versa. CURE eliminates that trade-off. The mechanism ensures that:
+
+- **Holders benefit** from reduced supply through continuous burns
+- **St. Jude receives** equal value in stable USDC donations
+- **Traders compete** in a liquid market with transparent, on-chain mechanics
+- **Impact is verifiable**—every donation is recorded on-chain
+
+### The Competitive Edge
+
+The trading environment remains fiercely competitive. Traders, bots, and sophisticated market participants compete for:
+- Optimal entry and exit points
+- The 1% caller reward from processing fees
+- Market-making opportunities in the single official pool
+
+This competition drives volume, and volume drives impact. The more active the market, the more value flows to both holders and St. Jude.
+
+## Technical Architecture
+
+### Core Contracts
 
 #### `CureToken.sol`
-- ERC20 token with name "Cure Token" and symbol "CURE"
-- Implements transfer restrictions via `_update()` override
-- Manages fee processing with block-based drip mechanism
-- Handles ETH → USDC swaps for charity
-- Handles ETH → CURE swaps for buyback and burn
+The main ERC20 token contract that:
+- Manages fee accumulation and processing
+- Executes buyback-and-burn operations
+- Handles charity donations via USDC swaps
+- Implements transfer restrictions to ensure all trading flows through the official pool
 
 #### `CureHook.sol`
-- Uniswap v4 hook that implements swap fees
-- Calculates fee based on blocks since deployment (99% → 1% decay)
-- Takes ETH fees from pool and forwards to `CureToken`
-- Manages `midSwap` flag to allow transfers during swaps
+The Uniswap v4 hook that:
+- Captures ETH fees on every swap
+- Implements the fee decay mechanism (99% → 1%)
+- Forwards collected fees to the token contract
+- Manages swap state to enable transfers during pool operations
 
-### PvP Layer
-- **Traders, bots, and snipers** fight for:
-  - Optimal entry points
-  - Exit timing
-  - The **1% caller reward** from `processFees()`
+### Key Features
 
-### PvE Layer
-- Every trade skims ETH that is forced on-chain to:
-  - Buy back and burn CURE (benefiting holders)
-  - Donate equal value to St. Jude Children's Research Hospital (0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2)
+#### Transfer Restrictions
+- No wallet-to-wallet transfers allowed
+- All trading must occur through the official Uniswap v4 pool
+- Prevents side pools and ensures all volume contributes to the impact mechanism
+- Only the official hook can enable transfers during swaps
+
+#### Time-Distributed Buybacks
+- Fees are processed gradually over blocks (not all at once)
+- Prevents gaming and manipulation
+- Creates sustainable, continuous impact
+- Anyone can call `processFees()`—it's permissionless and bot-friendly
+
+#### Transparent and Verifiable
+- Every donation is on-chain and auditable
+- Charity wallet: `0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2` (St. Jude Children's Research Hospital)
+- Burn address: `0x000000000000000000000000000000000000dEaD`
+- No hidden mechanisms, no multisig control, no opaque operations
+
+## The Impact Model
+
+### How Volume Creates Change
+
+The beauty of CURE's design is its scalability:
+
+- **Low volume**: Still generates donations, just at a smaller scale
+- **High volume**: Creates significant impact for both holders and charity
+- **Sustained volume**: Builds long-term value while funding ongoing research
+
+Every ETH that flows through the pool becomes part of this dual-purpose mechanism. There's no minimum threshold, no waiting period, no gatekeeping. Impact happens continuously, automatically, and transparently.
+
+### Real-World Connection
+
+St. Jude Children's Research Hospital is one of the world's leading institutions in pediatric cancer research. By directing 50% of all trading fees to St. Jude, CURE creates a direct, measurable connection between DeFi activity and life-saving medical research.
+
+This isn't abstract philanthropy. Every trade contributes to:
+- Cancer research and treatment development
+- Patient care for children fighting cancer
+- Families who never receive a bill from St. Jude
 
 ## Project Structure
 
@@ -152,36 +179,39 @@ npm run deploy
 2. Deploy `CureHook` with PoolManager and CureToken addresses
 3. Set hook on token: `cureToken.setHook(cureHookAddress)`
 4. Create Uniswap v4 pool with `CureHook`
-5. Initialize the pool (sets `deploymentBlock` in hook)
+5. Initialize the pool (sets deployment block in hook for fee decay)
 6. Add initial liquidity (e.g., 0.01 ETH + corresponding CURE tokens)
 7. Verify contracts on Etherscan
 8. (Optional) Renounce ownership after configuration is finalized
 
-## Key Features
+## Technical Details
 
 ### Fee Decay Mechanism
-- Starts at 99% fee at deployment
-- Decays by 1% per block
-- Reaches 1% after 98 blocks
-- Stays at 1% forever
+- Starts at 99% fee at pool initialization
+- Decays by 1% per block (approximately 12 seconds per block on Ethereum)
+- Reaches 1% after 98 blocks (~20 minutes)
+- Stays at 1% permanently after decay period
 
 ### Block-Based Drip
-- `processFees()` uses a fraction of ETH based on blocks elapsed
-- Prevents single-block gaming
-- Allows gradual utilization over `BUYBACK_PERIOD_BLOCKS` (100 blocks)
+- `processFees()` uses a fraction of accumulated ETH based on blocks elapsed
+- Prevents single-block manipulation
+- Allows gradual utilization over 100 blocks
+- Creates sustainable, continuous processing
 
-### Transfer Restrictions
-- Only Uniswap v4 pool operations can move tokens
-- No wallet-to-wallet transfers
-- No side pools possible
-- Forces all trading through official pool
-
-## Security Considerations
-
-- Contracts use OpenZeppelin's `ReentrancyGuard`
+### Security Features
+- OpenZeppelin's `ReentrancyGuard` for protection
 - Transfer restrictions prevent unauthorized token movement
-- Hook-only `midSwap` control prevents bypass
+- Hook-only swap control ensures all trading goes through official pool
 - Block-based drip prevents manipulation
+- No multisig or centralized control points
+
+## The Opportunity
+
+CURE represents a new paradigm for cryptocurrency: **profit with purpose, trading with impact, speculation with substance.**
+
+In a space often criticized for being disconnected from real-world value, CURE proves that DeFi mechanisms can be designed to create measurable, positive change. Every trade, every swap, every moment of market activity becomes part of something larger than price action.
+
+This is crypto's opportunity to show what it can be: not just a new financial system, but a new way to align economic incentives with human good.
 
 ## License
 
@@ -189,4 +219,8 @@ MIT
 
 ## Disclaimer
 
-This is an experimental project. Use at your own risk. Always conduct thorough audits before deploying to mainnet.
+This is an experimental project. Use at your own risk. Always conduct thorough audits before deploying to mainnet. Trading cryptocurrencies involves substantial risk of loss. The charitable donations are automatic and verifiable on-chain, but participation in trading should be based on your own research and risk tolerance.
+
+---
+
+**CURE Token**: Where every trade fights cancer. Where every swap funds research. Where profit meets purpose.
