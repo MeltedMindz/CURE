@@ -65,7 +65,7 @@ describe("CureToken", function () {
 
       await expect(
         cureToken.transfer(user1Address, amount)
-      ).to.be.revertedWith("CURE: transfers only via v4 hook");
+      ).to.be.revertedWith("CURE: transfers only via v4 hook or internal swap");
     });
 
     it("Should allow transfers when midSwap is true", async function () {

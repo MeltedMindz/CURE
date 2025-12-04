@@ -25,6 +25,7 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     address public charityWallet;
     address public hook;           // Uniswap v4 hook contract
     bool    public midSwap;        // true only during v4 swap/LP ops via hook
+    bool    private internalSwap;  // true only during internal buyback swaps
     uint256 public totalFeesReceived; // for analytics
     uint256 public lastProcessBlock;  // for block-based drip
 
@@ -35,6 +36,9 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     // Over this many blocks, if processFees is called regularly,
     // the protocol can fully utilize the ETH buffer.
     uint256 public constant BUYBACK_PERIOD_BLOCKS = 100;
+
+    // Standard burn address for better visibility on block explorers
+    address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
 
     event FeesProcessed(
         uint256 totalEthBefore,
@@ -101,28 +105,30 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     }
 
     // Public burn function for testing and user-initiated burns
+    // Transfers to BURN_ADDRESS for better visibility on block explorers
     function burn(uint256 amount) external {
-        _burn(msg.sender, amount);
+        _transfer(msg.sender, BURN_ADDRESS, amount);
     }
 
     // ───────── Transfer restrictions ─────────
-    // No wallet-to-wallet: transfers only during midSwap (Uniswap v4 ops) or mint/burn.
-    // Exception: transfers TO this contract are allowed for buyback operations (router swaps).
+    // No wallet-to-wallet: transfers only during:
+    // - Mint/burn operations
+    // - Uniswap v4 pool operations (midSwap == true)
+    // - Internal buyback swaps (internalSwap == true)
     function _update(
         address from,
         address to,
         uint256 value
     ) internal override {
         bool isMint = from == address(0);
-        bool isBurn = to == address(0);
-        bool isToContract = to == address(this); // Allow transfers to contract for buyback/burn
+        bool isBurn = to == address(0) || to == BURN_ADDRESS;
 
-        if (!isMint && !isBurn && !isToContract) {
-            // For any "normal" transfer, require midSwap == true.
-            // midSwap is only set by the Uniswap v4 hook during official pool operations.
-            // Exception: transfers TO this contract are allowed for buyback operations.
-            if (!midSwap) {
-                revert("CURE: transfers only via v4 hook");
+        if (!isMint && !isBurn) {
+            // Allow transfers only if:
+            // - we're in a Uniswap v4 pool operation (midSwap), or
+            // - we're in an internal buyback swap (internalSwap)
+            if (!midSwap && !internalSwap) {
+                revert("CURE: transfers only via v4 hook or internal swap");
             }
         }
 
@@ -235,18 +241,22 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
 
         uint256 before = balanceOf(address(this));
 
+        // Enable internalSwap flag to allow router to transfer CURE tokens to this contract
+        internalSwap = true;
         router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: ethAmount}(
             0,
             path,
             address(this),
             block.timestamp
         );
+        internalSwap = false;
 
         uint256 afterBal = balanceOf(address(this));
         tokensBurned = afterBal - before;
 
         if (tokensBurned > 0) {
-            _burn(address(this), tokensBurned);
+            // Transfer to burn address for better visibility on block explorers
+            _transfer(address(this), BURN_ADDRESS, tokensBurned);
         }
     }
 }

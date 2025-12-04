@@ -25,7 +25,7 @@ CURE is a token built on Uniswap v4 with a unique PvPvE (Player vs Player vs Env
   - **1%** caller reward (in ETH) paid to `msg.sender`
   - Remaining **99%** of ETH is split:
     - **50%** → swap ETH → USDC → sent to St. Jude Children's Research Hospital (0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2)
-    - **50%** → swap ETH → CURE → burn (send to `address(0)`)
+    - **50%** → swap ETH → CURE → burn (send to `0x000000000000000000000000000000000000dEaD`)
 - **For every unit of value used to buy back and burn CURE (benefiting holders), the same unit of value is donated to charity.**
 
 #### No Wallet-to-Wallet Transfers
