@@ -150,18 +150,23 @@ contract CureHook is BaseHook, ReentrancyGuard {
         // delta.amount0 is the pool's delta in ETH.
         int128 ethDelta = delta.amount0();
         // Safe absolute value: handle edge case where ethDelta is minimum int128 (-2^127)
-        // Negating type(int128).min would overflow, so we use type(int128).max instead
+        // The absolute value of type(int128).min is 2^127, which cannot fit in int128
+        // So we calculate the absolute value directly in uint256
+        uint256 ethAmount;
         if (ethDelta < 0) {
             if (ethDelta == type(int128).min) {
-                // Edge case: minimum int128 value cannot be negated without overflow
-                // Use maximum int128 value as safe approximation (practically impossible scenario)
-                ethDelta = type(int128).max;
+                // Edge case: minimum int128 value (-2^127)
+                // Absolute value is 2^127 = type(int128).max + 1
+                // Calculate in uint256 to avoid overflow
+                ethAmount = uint256(uint128(type(int128).max)) + 1; // 2^127
             } else {
-                ethDelta = -ethDelta;
+                // Standard case: negate (safe since not min) and convert to uint256
+                ethAmount = uint256(uint128(-ethDelta));
             }
+        } else {
+            // Positive value: convert directly to uint256
+            ethAmount = uint256(uint128(ethDelta));
         }
-
-        uint256 ethAmount = uint128(uint256(int256(ethDelta)));
         uint128 feeBips = _calculateFeeBips();
         uint256 feeAmount = (ethAmount * feeBips) / TOTAL_BIPS;
 
