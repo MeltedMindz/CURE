@@ -106,6 +106,7 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
 
     // ───────── Transfer restrictions ─────────
     // No wallet-to-wallet: transfers only during midSwap (Uniswap v4 ops) or mint/burn.
+    // Exception: transfers TO this contract are allowed for buyback operations (router swaps).
     function _update(
         address from,
         address to,
@@ -113,10 +114,12 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     ) internal override {
         bool isMint = from == address(0);
         bool isBurn = to == address(0);
+        bool isToContract = to == address(this); // Allow transfers to contract for buyback/burn
 
-        if (!isMint && !isBurn) {
+        if (!isMint && !isBurn && !isToContract) {
             // For any "normal" transfer, require midSwap == true.
             // midSwap is only set by the Uniswap v4 hook during official pool operations.
+            // Exception: transfers TO this contract are allowed for buyback operations.
             if (!midSwap) {
                 revert("CURE: transfers only via v4 hook");
             }
