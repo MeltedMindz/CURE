@@ -169,9 +169,10 @@ contract CureHook is BaseHook, ReentrancyGuard {
         if (ethDelta < 0) {
             if (ethDelta == type(int128).min) {
                 // Edge case: minimum int128 value (-2^127)
-                // Absolute value is 2^127 = type(int128).max + 1
-                // Calculate in uint256 to avoid overflow
-                ethAmount = uint256(uint128(type(int128).max)) + 1; // 2^127
+                // Absolute value is 2^127, which cannot be represented in int128
+                // type(int128).max = 2^127 - 1, so we calculate: max + 1 = 2^127
+                // This is mathematically correct: abs(-2^127) = 2^127
+                ethAmount = uint256(uint128(type(int128).max)) + 1; // Correctly calculates 2^127
             } else {
                 // Standard case: negate (safe since not min) and convert to uint256
                 ethAmount = uint256(uint128(-ethDelta));

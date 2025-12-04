@@ -12,7 +12,7 @@ async function main() {
   // Configuration - update these values
   const ROUTER_ADDRESS = process.env.UNISWAP_V2_ROUTER || "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"; // Uniswap V2 Router on mainnet
   const USDC_ADDRESS = process.env.USDC_ADDRESS || "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // USDC on mainnet
-  const CHARITY_WALLET = process.env.CHARITY_WALLET || "0x0000000000000000000000000000000000000000"; // TODO: Set St. Jude wallet
+  const CHARITY_WALLET = process.env.CHARITY_WALLET || "0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2"; // St. Jude Children's Research Hospital
   const INITIAL_SUPPLY = process.env.INITIAL_SUPPLY ? BigInt(process.env.INITIAL_SUPPLY) : BigInt(1_000_000_000); // 1B tokens
   const POOL_MANAGER_ADDRESS = process.env.POOL_MANAGER_ADDRESS || "0x0000000000000000000000000000000000000000"; // TODO: Set Uniswap v4 PoolManager address
 

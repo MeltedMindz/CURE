@@ -24,7 +24,7 @@ CURE is a token built on Uniswap v4 with a unique PvPvE (Player vs Player vs Env
 - Anyone can call `processFees()`:
   - **1%** caller reward (in ETH) paid to `msg.sender`
   - Remaining **99%** of ETH is split:
-    - **50%** → swap ETH → USDC → sent to St. Jude charity wallet
+    - **50%** → swap ETH → USDC → sent to St. Jude Children's Research Hospital (0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2)
     - **50%** → swap ETH → CURE → burn (send to `address(0)`)
 - **For every unit of value used to buy back and burn CURE (benefiting holders), the same unit of value is donated to charity.**
 
@@ -78,7 +78,7 @@ CURE is a token built on Uniswap v4 with a unique PvPvE (Player vs Player vs Env
 ### PvE Layer
 - Every trade skims ETH that is forced on-chain to:
   - Buy back and burn CURE (benefiting holders)
-  - Donate equal value to St. Jude Children's Research Hospital
+  - Donate equal value to St. Jude Children's Research Hospital (0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2)
 
 ## Project Structure
 
@@ -136,7 +136,7 @@ npm run test
 PRIVATE_KEY=your_private_key
 UNISWAP_V2_ROUTER=0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
 USDC_ADDRESS=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-CHARITY_WALLET=0x... # St. Jude wallet address
+CHARITY_WALLET=0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2 # St. Jude Children's Research Hospital
 POOL_MANAGER_ADDRESS=0x... # Uniswap v4 PoolManager address
 INITIAL_SUPPLY=1000000000
 ```

@@ -21,6 +21,7 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
     IUniswapV2Router02 public immutable router;
     address public immutable WETH;
     address public immutable USDC;
+    // St. Jude Children's Research Hospital donation address: 0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2
     address public charityWallet;
     address public hook;           // Uniswap v4 hook contract
     bool    public midSwap;        // true only during v4 swap/LP ops via hook
