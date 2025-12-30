@@ -188,7 +188,7 @@ export default function Home() {
                       <DonationRow
                         label={landingContent.builderDisclosureAndSupport.supportSection.addresses.btc.label}
                         value={landingContent.builderDisclosureAndSupport.supportSection.addresses.btc.value}
-                        showCopy={false}
+                        showCopy={true}
                       />
                     </div>
 
