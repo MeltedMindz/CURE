@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: 'Inter', sans-serif;
+  
+  /* Dark theme palette */
+  --bg: #070A12;
+  --surface-1: #0B1220;
+  --surface-2: #0E1628;
+  --surface-3: #111B31;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: rgba(255, 255, 255, 0.92);
+  --text-muted: rgba(255, 255, 255, 0.65);
+  --primary: rgb(142, 118, 255);
+  --primary-foreground: #070A12;
+  --primary-muted: rgba(142, 118, 255, 0.8);
+  --accent: rgba(142, 118, 255, 0.20);
+  --focus: rgba(142, 118, 255, 0.5);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

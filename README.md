@@ -125,9 +125,15 @@ CURE/
 ├── test/
 │   ├── CureToken.test.ts          # Token contract tests
 │   └── CureHook.test.ts           # Hook contract tests
+├── frontend/                      # Next.js frontend application
+│   ├── app/                       # Next.js app directory
+│   ├── components/                # React components
+│   ├── lib/                       # Utilities and hooks
+│   └── README.md                  # Frontend documentation
 ├── hardhat.config.ts              # Hardhat configuration
 ├── package.json                   # Dependencies
 ├── tsconfig.json                  # TypeScript configuration
+├── AUDIT_NOTES.md                 # Security audit notes
 └── README.md                       # This file
 ```
 
