@@ -1,35 +1,45 @@
 /**
  * Contract ABIs and addresses
+ * 
+ * NOTE: This file is deprecated. Use src/contracts/index.ts instead.
+ * This file is kept for backward compatibility during migration.
+ * 
+ * Migration path:
+ * - Import contract ABIs from @/src/contracts/abis
+ * - Import address utilities from @/src/contracts
+ * - Update any code using getCureTokenAddress() to use getPrimaryContractAddress() from src/contracts
  */
 
-import cureTokenAbi from './cureToken.json';
-import cureHookAbi from './cureHook.json';
-import { getContractAddress } from '../config';
+import { getPrimaryContractAddress, isChainDeployed } from '@/src/contracts';
+import { CURE_TOKEN_ABI as NewCureTokenAbi, CURE_HOOK_ABI as NewCureHookAbi } from '@/src/contracts/abis';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const CURE_TOKEN_ABI = (cureTokenAbi as any).abi;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const CURE_HOOK_ABI = (cureHookAbi as any).abi;
+// Re-export ABIs for backward compatibility
+export const CURE_TOKEN_ABI = NewCureTokenAbi;
+export const CURE_HOOK_ABI = NewCureHookAbi;
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-
+/**
+ * @deprecated Use getPrimaryContractAddress(chainId) from @/src/contracts instead
+ */
 export function getCureTokenAddress(): `0x${string}` | null {
-  const addr = getContractAddress('cureToken');
-  if (!addr || addr === ZERO_ADDRESS) {
-    return null;
-  }
-  if (!addr.startsWith('0x')) throw new Error('Invalid address format');
-  return addr as `0x${string}`;
+  // Default to chain ID 1 (mainnet) for backward compatibility
+  // This should be updated to use the actual chain ID from wagmi context
+  const chainId = 1;
+  return getPrimaryContractAddress(chainId);
 }
 
+/**
+ * @deprecated Use isChainDeployed(chainId) from @/src/contracts instead
+ */
 export function isContractConfigured(): boolean {
-  const addr = getContractAddress('cureToken');
-  return !!(addr && addr !== ZERO_ADDRESS);
+  const chainId = 1; // Default to mainnet
+  return isChainDeployed(chainId);
 }
 
+/**
+ * @deprecated This function is deprecated. Use getAddresses(chainId) from @/src/contracts instead
+ */
 export function getCureHookAddress(): `0x${string}` | undefined {
-  const addr = getContractAddress('cureHook');
-  if (!addr) return undefined;
-  if (!addr.startsWith('0x')) return undefined;
-  return addr as `0x${string}`;
+  // This function is deprecated and should not be used
+  // Use getAddresses(chainId) from @/src/contracts instead
+  return undefined;
 }

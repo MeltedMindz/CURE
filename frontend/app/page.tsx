@@ -24,7 +24,9 @@ export default function Home() {
             className="focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded"
             aria-label="CURE Onchain Home"
           >
-            <Logo variant="lockup" size={28} />
+            {/* Responsive: mark on small screens, lockup on larger */}
+            <Logo variant="lockup" size={28} className="hidden sm:inline-flex" />
+            <Logo variant="mark" size={24} className="sm:hidden" />
           </Link>
           <div className="flex items-center space-x-4">
             <Link href="/app" className="text-text-muted hover:text-text font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded">
@@ -49,7 +51,7 @@ export default function Home() {
               <Link href="/app">
                 <Button size="lg">Launch App</Button>
               </Link>
-              <Link href="#how-it-works">
+              <Link href="/learn">
                 <Button variant="outline" size="lg">Learn More</Button>
               </Link>
             </div>
@@ -217,8 +219,20 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-border-dark bg-surface-1 py-10">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-text-muted text-sm">{landingContent.footer.text}</p>
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+              <p className="text-text-muted text-sm text-center md:text-left">{landingContent.footer.text}</p>
+              <nav className="flex gap-6 text-sm">
+                <Link href="/learn" className="text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded">
+                  Learn More
+                </Link>
+                <Link href="/legal" className="text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded">
+                  Legal
+                </Link>
+              </nav>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

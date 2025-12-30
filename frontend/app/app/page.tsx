@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { ContractStats } from '@/components/ContractStats';
 import { ProcessFeesButton } from '@/components/ProcessFeesButton';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Stat } from '@/components/ui/Stat';
 import { Badge } from '@/components/ui/Badge';
 import { Logo } from '@/components/Logo';
 import { config } from '@/lib/config';
@@ -28,7 +29,9 @@ export default function AppPage() {
               className="focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded"
               aria-label="CURE Onchain Home"
             >
-              <Logo variant="lockup" size={28} />
+              {/* Responsive: mark on small screens, lockup on larger */}
+              <Logo variant="lockup" size={28} className="hidden sm:inline-flex" />
+              <Logo variant="mark" size={24} className="sm:hidden" />
             </Link>
             <Badge variant="info">App</Badge>
           </div>
@@ -119,9 +122,6 @@ export default function AppPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Trade CURE</CardTitle>
-                <CardDescription>
-                  Swap CURE tokens on Uniswap
-                </CardDescription>
               </CardHeader>
               <CardContent>
                 {config.uniswapPoolLink ? (
@@ -131,9 +131,10 @@ export default function AppPage() {
                     </Button>
                   </a>
                 ) : (
-                  <div className="text-sm text-text-muted">
-                    Pool will be available once the contract is deployed and liquidity is added.
-                  </div>
+                  <Stat
+                    label="Swap CURE tokens on Uniswap"
+                    value="Coming soon"
+                  />
                 )}
               </CardContent>
             </Card>
@@ -203,9 +204,23 @@ export default function AppPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border-dark bg-surface-1 py-8 mt-16">
-        <div className="container mx-auto px-4 text-center text-text-muted">
-          <p>CURE Onchain - Where every trade creates impact. Where every swap funds research.</p>
+      <footer className="border-t border-border-dark bg-surface-1 py-10 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+              <p className="text-text-muted text-sm text-center md:text-left">
+                CURE Onchain - Where every trade creates impact. Where every swap funds research.
+              </p>
+              <nav className="flex gap-6 text-sm">
+                <Link href="/learn" className="text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded">
+                  Learn More
+                </Link>
+                <Link href="/legal" className="text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded">
+                  Legal
+                </Link>
+              </nav>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

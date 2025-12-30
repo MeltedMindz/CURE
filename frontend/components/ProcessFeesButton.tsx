@@ -3,6 +3,7 @@
 import { useCureToken } from '@/lib/hooks/useCureToken';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Stat } from '@/components/ui/Stat';
 
 export function ProcessFeesButton() {
   const { isConfigured, processFees, isPending, isConfirming, isConfirmed, error, contractBalance } = useCureToken();
@@ -18,26 +19,15 @@ export function ProcessFeesButton() {
 
   if (!isConfigured) {
     return (
-      <Card className="opacity-60">
+      <Card>
         <CardHeader>
           <CardTitle>Process Fees</CardTitle>
-          <CardDescription>
-            Process accumulated ETH fees. 1% reward goes to caller, 49.5% to charity, 49.5% for buyback and burn.
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="text-sm text-text-muted">
-              Contract not yet deployed. This feature will be available once the contract is live.
-            </div>
-            <Button
-              disabled={true}
-              size="lg"
-              className="w-full"
-            >
-              Coming Soon
-            </Button>
-          </div>
+          <Stat
+            label="Process accumulated ETH fees"
+            value="Coming soon"
+          />
         </CardContent>
       </Card>
     );

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- Favicon uses heavier strokes for small size legibility -->
+  <!-- Outer circle stroke -->
+  <circle cx="50" cy="50" r="46" stroke="rgb(142, 118, 255)" stroke-width="5" fill="none"></circle>
+  <!-- Left half fill -->
+  <path d="M50 8 A42 42 0 0 0 50 92 Z" fill="rgb(142, 118, 255)"></path>
+  <!-- Divider line -->
+  <line x1="50" y1="8" x2="50" y2="92" stroke="#0B1220" stroke-width="5"></line>
+</svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
+@media (prefers-color-scheme: dark) { :root { filter: none; } }
+</style></svg>
