@@ -90,7 +90,7 @@ export const landingContent = {
         },
         btc: {
           label: 'Bitcoin (BTC)',
-          value: 'not yet published',
+          value: '3JgNXd5AwZgj5UAN1ELaUQeUxgzVmr6Byg',
         },
       },
       contributionNote: 'Contributions are not investments and do not entitle contributors to any ownership, profit participation, or future benefit. They are purely voluntary donations to support continued development.',
