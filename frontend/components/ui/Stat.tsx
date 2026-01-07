@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 interface StatProps extends React.HTMLAttributes<HTMLDivElement> {
   label: string;
@@ -28,7 +29,10 @@ export const Stat = React.forwardRef<HTMLDivElement, StatProps>(
           'text-[var(--primary)]': isPercentage,
           'text-text': !isPercentage,
         })}>
-          {valueDisplay}
+          <AnimatedCounter 
+            targetValue={valueDisplay}
+            className="block"
+          />
         </div>
         {description && (
           <div className={cn('text-xs mt-1', {

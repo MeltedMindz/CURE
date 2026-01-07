@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Stat } from '@/components/ui/Stat';
 import { Badge } from '@/components/ui/Badge';
 import { Logo } from '@/components/Logo';
+import { GeometricLogo } from '@/components/GeometricLogo';
 import { config } from '@/lib/config';
 import { getCureTokenAddress, isContractConfigured } from '@/lib/contracts';
 
@@ -29,9 +30,9 @@ export default function AppPage() {
               className="focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded"
               aria-label="CURE Onchain Home"
             >
-              {/* Responsive: mark on small screens, lockup on larger */}
-              <Logo variant="lockup" size={28} className="hidden sm:inline-flex" />
-              <Logo variant="mark" size={24} className="sm:hidden" />
+              {/* Use new geometric logo */}
+              <GeometricLogo size={32} className="hidden sm:flex" />
+              <GeometricLogo size={28} showText={false} className="sm:hidden" />
             </Link>
             <Badge variant="info">App</Badge>
           </div>

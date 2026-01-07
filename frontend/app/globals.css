@@ -88,4 +88,88 @@ body::before {
     left: -12px;
     transform: translateY(-50%);
   }
+  
+  /* Advanced animations for 2025 landing page */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+      transform: scale(1);
+    }
+    50% { 
+      box-shadow: 0 0 40px rgba(34, 197, 94, 0.5);
+      transform: scale(1.05);
+    }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  
+  .floating-element {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .pulse-on-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .pulse-on-hover:hover {
+    animation: pulse-glow 2s infinite;
+  }
+  
+  .shimmer-effect {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(34, 197, 94, 0.1) 50%,
+      transparent 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 3s infinite;
+  }
+  
+  .interactive-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  
+  .interactive-card:hover {
+    transform: translateY(-8px) rotateX(5deg);
+    box-shadow: 0 20px 40px rgba(34, 197, 94, 0.15);
+  }
+  
+  .micro-bounce {
+    transition: transform 0.2s ease;
+  }
+  
+  .micro-bounce:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Scroll-triggered animations */
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-on-scroll {
+    animation: slideInUp 0.8s ease forwards;
+  }
+  
+  /* Parallax background layers */
+  .parallax-layer {
+    position: absolute;
+    will-change: transform;
+  }
 }
