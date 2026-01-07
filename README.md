@@ -248,4 +248,33 @@ CURE turns normal crypto trading volume into real-world cancer research funding 
 
 ---
 
+## Builder Disclosure and Support
+
+### Support the Builder
+
+This project is fully bootstrapped and developed independently.
+
+If you find the work valuable and would like to support ongoing development, research, and maintenance, you may do so directly via voluntary onchain contributions.
+
+**Contributions are optional and are not connected to token ownership, protocol usage, governance rights, or financial returns.**
+
+**Ethereum (ENS)**  
+`meltedfrozen.eth`
+
+**Ethereum (Address)**  
+`0xE5E6ca8899E86E63Ef067e16825C04c52d20e595`
+
+**Bitcoin (BTC)**  
+`3JgNXd5AwZgj5UAN1ELaUQeUxgzVmr6Byg`
+
+*Contributions are not investments and do not entitle contributors to any ownership, profit participation, or future benefit. They are purely voluntary donations to support continued development.*
+
+### Builder Disclosure
+
+The CURE smart contracts are deployed and maintained by an independent builder. To avoid conflicts of interest and incentive misalignment, the builder does not receive protocol revenue and does not buy, hold, or trade the CURE token.
+
+The builder's role is limited to writing, deploying, and maintaining the open-source code and infrastructure required for the protocol to operate as designed. All onchain economics are enforced transparently by the contracts themselves, not by discretionary control.
+
+---
+
 **CURE Token**: Where every trade fights cancer. Where every swap funds research. Where profit meets purpose.
