@@ -1,3 +1,5 @@
+![CURE Token - Where Trading Meets Impact](./og.png)
+
 # CURE Token - Where Trading Meets Impact
 
 **Every trade. Every swap. Every moment of market activity becomes a force for good.**
