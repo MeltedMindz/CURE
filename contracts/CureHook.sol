@@ -19,10 +19,12 @@ contract CureHook is BaseHook, ReentrancyGuard {
     using SafeCast for uint256;
     using SafeCast for int128;
 
-    uint128 private constant TOTAL_BIPS        = 10_000;
-    uint128 private constant FINAL_FEE_BIPS    = 100;   // 1%
-    uint128 private constant STARTING_FEE_BIPS = 9_900; // 99%
-    uint128 private constant BIPS_PER_BLOCK    = 100;   // 1% per block
+    // Gas optimized constants
+    uint256 private constant TOTAL_BIPS        = 10_000;
+    uint256 private constant FINAL_FEE_BIPS    = 100;   // 1%
+    uint256 private constant STARTING_FEE_BIPS = 9_900; // 99%
+    uint256 private constant BIPS_PER_BLOCK    = 100;   // 1% per block
+    uint256 private constant MAX_REDUCIBLE     = 9_800; // STARTING_FEE_BIPS - FINAL_FEE_BIPS
 
     Currency private constant ETH_CURRENCY = Currency.wrap(address(0));
 
@@ -32,6 +34,11 @@ contract CureHook is BaseHook, ReentrancyGuard {
     // Pool-specific deployment blocks (per Uniswap v4 best practices)
     // A single hook contract can service multiple pools, so state must be pool-specific
     mapping(PoolId => uint256) public deploymentBlocks;
+    
+    // Custom errors for gas efficiency
+    error WrongPoolToken();
+    error Currency0NotETH();
+    error AddFeesFailed();
     
     /// @notice Get the deployment block for a specific pool
     /// @param poolId The pool ID to query
@@ -84,14 +91,12 @@ contract CureHook is BaseHook, ReentrancyGuard {
         PoolKey calldata key,
         uint160
     ) internal override returns (bytes4) {
-        require(
-            Currency.unwrap(key.currency1) == address(cureToken),
-            "CureHook: wrong pool/token"
-        );
-        require(
-            Currency.unwrap(key.currency0) == address(0),
-            "CureHook: currency0 not ETH"
-        );
+        if (Currency.unwrap(key.currency1) != address(cureToken)) {
+            revert WrongPoolToken();
+        }
+        if (Currency.unwrap(key.currency0) != address(0)) {
+            revert Currency0NotETH();
+        }
 
         PoolId poolId = key.toId();
         if (deploymentBlocks[poolId] == 0) {
@@ -101,22 +106,30 @@ contract CureHook is BaseHook, ReentrancyGuard {
         return BaseHook.beforeInitialize.selector;
     }
 
-    // ─── Fee calculation ───
-    function _calculateFeeBips(PoolId poolId) internal view returns (uint128) {
+    // ─── Gas optimized fee calculation ───
+    function _calculateFeeBips(PoolId poolId) internal view returns (uint256) {
         uint256 poolDeploymentBlock = deploymentBlocks[poolId];
         if (poolDeploymentBlock == 0) {
             return FINAL_FEE_BIPS;
         }
 
-        uint256 blocksPassed = block.number - poolDeploymentBlock;
-        uint256 maxReducible = STARTING_FEE_BIPS - FINAL_FEE_BIPS; // 9800
-        uint256 reduction = blocksPassed * BIPS_PER_BLOCK;
+        uint256 blocksPassed;
+        unchecked {
+            blocksPassed = block.number - poolDeploymentBlock;
+        }
+        
+        uint256 reduction;
+        unchecked {
+            reduction = blocksPassed * BIPS_PER_BLOCK;
+        }
 
-        if (reduction >= maxReducible) {
+        if (reduction >= MAX_REDUCIBLE) {
             return FINAL_FEE_BIPS;
         }
 
-        return uint128(STARTING_FEE_BIPS - reduction);
+        unchecked {
+            return STARTING_FEE_BIPS - reduction;
+        }
     }
 
     // ─── Swap hooks ───
@@ -126,14 +139,12 @@ contract CureHook is BaseHook, ReentrancyGuard {
         SwapParams calldata,
         bytes calldata
     ) internal override returns (bytes4, BeforeSwapDelta, uint24) {
-        require(
-            Currency.unwrap(key.currency1) == address(cureToken),
-            "CureHook: wrong pool/token"
-        );
-        require(
-            Currency.unwrap(key.currency0) == address(0),
-            "CureHook: currency0 not ETH"
-        );
+        if (Currency.unwrap(key.currency1) != address(cureToken)) {
+            revert WrongPoolToken();
+        }
+        if (Currency.unwrap(key.currency0) != address(0)) {
+            revert Currency0NotETH();
+        }
 
         // Signal to token that this is a legit v4 pool operation
         cureToken.setMidSwap(true);
@@ -153,10 +164,9 @@ contract CureHook is BaseHook, ReentrancyGuard {
         bytes calldata
     ) internal override returns (bytes4, int128) {
         // We expect ETH as currency0
-        require(
-            Currency.unwrap(key.currency0) == address(0),
-            "CureHook: currency0 not ETH"
-        );
+        if (Currency.unwrap(key.currency0) != address(0)) {
+            revert Currency0NotETH();
+        }
 
         // delta.amount0 is the pool's delta in ETH.
         int128 ethDelta = delta.amount0();
@@ -182,8 +192,11 @@ contract CureHook is BaseHook, ReentrancyGuard {
             ethAmount = uint256(uint128(ethDelta));
         }
         
-        uint128 feeBips = _calculateFeeBips(poolId);
-        uint256 feeAmount = (ethAmount * feeBips) / TOTAL_BIPS;
+        uint256 feeBips = _calculateFeeBips(poolId);
+        uint256 feeAmount;
+        unchecked {
+            feeAmount = (ethAmount * feeBips) / TOTAL_BIPS;
+        }
 
         // Return delta: negative because we're taking ETH from the pool
         // When afterSwapReturnDelta is true, we must return the delta for currency0 (ETH)
@@ -197,18 +210,20 @@ contract CureHook is BaseHook, ReentrancyGuard {
                 PoolId.unwrap(poolId),
                 sender,
                 uint128(feeAmount),
-                feeBips
+                uint128(feeBips)
             );
 
             // Forward ETH to CureToken as fees
             (bool ok, ) = address(cureToken).call{value: feeAmount}(
                 abi.encodeWithSelector(ICureTokenMinimal.addFees.selector)
             );
-            require(ok, "CureHook: addFees failed");
+            if (!ok) revert AddFeesFailed();
             
             // Return negative delta: we took feeAmount from currency0 (ETH)
             // This must be negative to account for the ETH we removed from the pool
-            returnDelta = -int128(int256(feeAmount));
+            unchecked {
+                returnDelta = -int128(int256(feeAmount));
+            }
         }
 
         // Turn off midSwap now that swap is over

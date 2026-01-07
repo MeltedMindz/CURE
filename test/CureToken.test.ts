@@ -65,7 +65,7 @@ describe("CureToken", function () {
 
       await expect(
         cureToken.transfer(user1Address, amount)
-      ).to.be.revertedWith("CURE: transfers only via v4 hook or internal swap");
+      ).to.be.revertedWithCustomError(cureToken, "TransferRestricted");
     });
 
     it("Should allow transfers when midSwap is true", async function () {
@@ -234,7 +234,7 @@ describe("CureToken", function () {
     it("Should only allow hook to set midSwap", async function () {
       await expect(
         cureToken.connect(user2).setMidSwap(true)
-      ).to.be.revertedWith("Only hook");
+      ).to.be.revertedWithCustomError(cureToken, "OnlyHook");
     });
   });
 });

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,28 +17,39 @@ interface IUniswapV2Router02 {
 }
 
 contract CureToken is ERC20, Ownable, ReentrancyGuard {
-    // ───────── Core config ─────────
+    // ───────── Core config (storage optimized) ─────────
     IUniswapV2Router02 public immutable router;
     address public immutable WETH;
     address public immutable USDC;
     // St. Jude Children's Research Hospital donation address: 0xd0fcC6215D88ff02a75C377aC19af2BB6ff225a2
     address public charityWallet;
     address public hook;           // Uniswap v4 hook contract
-    bool    public midSwap;        // true only during v4 swap/LP ops via hook
-    bool    private internalSwap;  // true only during internal buyback swaps
+    
+    // Pack booleans and smaller values for gas optimization
+    struct SwapState {
+        bool midSwap;        // true only during v4 swap/LP ops via hook
+        bool internalSwap;   // true only during internal buyback swaps
+        uint96 padding;      // padding to complete 32-byte slot
+    }
+    SwapState private swapState;
+    
     uint256 public totalFeesReceived; // for analytics
     uint256 public lastProcessBlock;  // for block-based drip
 
-    // 1% caller fee
-    uint256 public constant CALLER_FEE_NUM = 1;
-    uint256 public constant CALLER_FEE_DEN = 100;
-
-    // Over this many blocks, if processFees is called regularly,
-    // the protocol can fully utilize the ETH buffer.
-    uint256 public constant BUYBACK_PERIOD_BLOCKS = 100;
-
+    // Gas optimized constants - use smaller types where possible
+    uint128 public constant CALLER_FEE_NUM = 1;
+    uint128 public constant CALLER_FEE_DEN = 100;
+    uint128 public constant BUYBACK_PERIOD_BLOCKS = 100;
+    
     // Standard burn address for better visibility on block explorers
     address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+    
+    // Error definitions for gas efficiency (Solidity 0.8.4+)
+    error ZeroAddress();
+    error OnlyHook();
+    error TransferRestricted();
+    error CallerRewardFailed();
+    error InvalidFeeAmount();
 
     event FeesProcessed(
         uint256 totalEthBefore,
@@ -60,9 +71,9 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
         address _charityWallet,
         uint256 _initialSupply // e.g. 1_000_000_000
     ) ERC20("Cure Token", "CURE") Ownable(msg.sender) {
-        require(_router != address(0), "Router zero");
-        require(_usdc != address(0), "USDC zero");
-        require(_charityWallet != address(0), "Charity zero");
+        if (_router == address(0)) revert ZeroAddress();
+        if (_usdc == address(0)) revert ZeroAddress();
+        if (_charityWallet == address(0)) revert ZeroAddress();
 
         router = IUniswapV2Router02(_router);
         USDC = _usdc;
@@ -86,21 +97,21 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
 
     // ───────── Admin ─────────
     function setCharityWallet(address _newWallet) external onlyOwner {
-        require(_newWallet != address(0), "Zero address");
+        if (_newWallet == address(0)) revert ZeroAddress();
         emit CharityWalletUpdated(charityWallet, _newWallet);
         charityWallet = _newWallet;
     }
 
     function setHook(address _hook) external onlyOwner {
-        require(_hook != address(0), "Zero hook");
+        if (_hook == address(0)) revert ZeroAddress();
         emit HookUpdated(hook, _hook);
         hook = _hook;
     }
 
     // Called by the hook only
     function setMidSwap(bool _midSwap) external {
-        require(msg.sender == hook, "Only hook");
-        midSwap = _midSwap;
+        if (msg.sender != hook) revert OnlyHook();
+        swapState.midSwap = _midSwap;
         emit MidSwapToggled(_midSwap);
     }
 
@@ -130,8 +141,9 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
             // Allow transfers only if:
             // - we're in a Uniswap v4 pool operation (midSwap), or
             // - we're in an internal buyback swap (internalSwap)
-            if (!midSwap && !internalSwap) {
-                revert("CURE: transfers only via v4 hook or internal swap");
+            SwapState memory state = swapState; // Cache storage read
+            if (!state.midSwap && !state.internalSwap) {
+                revert TransferRestricted();
             }
         }
 
@@ -177,7 +189,10 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
 
         lastProcessBlock = block.number;
 
-        uint256 callerReward = (amountToUse * CALLER_FEE_NUM) / CALLER_FEE_DEN;
+        uint256 callerReward;
+        unchecked {
+            callerReward = (amountToUse * CALLER_FEE_NUM) / CALLER_FEE_DEN;
+        }
         uint256 remaining = amountToUse - callerReward;
 
         uint256 ethForCharity = 0;
@@ -187,12 +202,14 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
 
         if (callerReward > 0) {
             (bool ok, ) = payable(msg.sender).call{value: callerReward}("");
-            require(ok, "Caller reward failed");
+            if (!ok) revert CallerRewardFailed();
         }
 
         if (remaining > 0) {
-            ethForCharity = remaining / 2;
-            ethForBuyback = remaining - ethForCharity;
+            unchecked {
+                ethForCharity = remaining >> 1; // Gas optimized division by 2
+                ethForBuyback = remaining - ethForCharity;
+            }
 
             if (ethForCharity > 0) {
                 usdcSent = _swapETHForUSDCToCharity(ethForCharity);
@@ -245,14 +262,14 @@ contract CureToken is ERC20, Ownable, ReentrancyGuard {
         uint256 before = balanceOf(address(this));
 
         // Enable internalSwap flag to allow router to transfer CURE tokens to this contract
-        internalSwap = true;
+        swapState.internalSwap = true;
         router.swapExactETHForTokensSupportingFeeOnTransferTokens{value: ethAmount}(
             0,
             path,
             address(this),
             block.timestamp
         );
-        internalSwap = false;
+        swapState.internalSwap = false;
 
         uint256 afterBal = balanceOf(address(this));
         tokensBurned = afterBal - before;
