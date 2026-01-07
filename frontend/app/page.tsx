@@ -7,6 +7,7 @@ import { StatCard } from '@/components/ui/StatCard';
 import { CredibilityStrip } from '@/components/CredibilityStrip';
 import { DonationRow } from '@/components/DonationRow';
 import { Logo } from '@/components/Logo';
+import { GeometricLogo } from '@/components/GeometricLogo';
 import { landingContent } from '@/lib/content/landing';
 import { config } from '@/lib/config';
 
@@ -24,9 +25,9 @@ export default function Home() {
             className="focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded"
             aria-label="CURE Onchain Home"
           >
-            {/* Responsive: mark on small screens, lockup on larger */}
-            <Logo variant="lockup" size={28} className="hidden sm:inline-flex" />
-            <Logo variant="mark" size={24} className="sm:hidden" />
+            {/* Use new geometric logo */}
+            <GeometricLogo size={32} className="hidden sm:flex" />
+            <GeometricLogo size={28} showText={false} className="sm:hidden" />
           </Link>
           <div className="flex items-center space-x-4">
             <Link href="/app" className="text-text-muted hover:text-text font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 rounded">
@@ -38,12 +39,30 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-surface-1 py-24 md:py-32">
-        <div className="container mx-auto px-4">
+      <section className="bg-surface-1 py-24 md:py-32 relative overflow-hidden">
+        {/* Geometric background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-16 h-16 opacity-10">
+            <GeometricLogo size={64} showText={false} />
+          </div>
+          <div className="absolute top-40 right-20 w-12 h-12 opacity-5">
+            <GeometricLogo size={48} showText={false} />
+          </div>
+          <div className="absolute bottom-20 left-1/4 w-10 h-10 opacity-10">
+            <GeometricLogo size={40} showText={false} />
+          </div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
+            {/* Large geometric logo in hero */}
+            <div className="mb-8 flex justify-center">
+              <GeometricLogo size={120} showText={false} className="opacity-80" />
+            </div>
+            
             <h1 className="text-5xl md:text-6xl font-bold text-text mb-6 leading-tight">
               {landingContent.hero.title}
-          </h1>
+            </h1>
             <p className="text-xl md:text-2xl text-text-muted mb-10 max-w-3xl mx-auto leading-relaxed">
               {landingContent.hero.subtitle}
             </p>

@@ -9,12 +9,12 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading, disabled, children, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 disabled:opacity-50 disabled:pointer-events-none';
+    const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--focus)] focus:ring-offset-2 focus:ring-offset-surface-1 disabled:opacity-50 disabled:pointer-events-none relative overflow-hidden';
     
     const variants = {
-      primary: 'bg-[var(--primary)] text-white hover:opacity-90 focus:ring-[var(--focus)]',
-      secondary: 'bg-surface-3 text-text border border-border-dark hover:bg-surface-2 focus:ring-[var(--focus)]',
-      outline: 'border border-border-dark bg-transparent text-text hover:bg-surface-3 focus:ring-[var(--focus)]',
+      primary: 'bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary-muted)] focus:ring-[var(--focus)] shadow-lg shadow-[var(--primary)]/25',
+      secondary: 'geometric-border text-text hover:bg-surface-2 focus:ring-[var(--focus)]',
+      outline: 'border border-[var(--primary)] bg-transparent text-[var(--primary)] hover:bg-[var(--accent)] focus:ring-[var(--focus)]',
       ghost: 'text-text hover:bg-surface-3 focus:ring-[var(--focus)]',
     };
 
