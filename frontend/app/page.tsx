@@ -204,19 +204,19 @@ export default function Home() {
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <div className="text-2xl font-bold text-[var(--primary)]">
-                          <AnimatedCounter targetValue="$1.8M" className="block" />
+                        <div className="text-3xl font-bold text-[var(--primary)]">
+                          <AnimatedCounter targetValue="50%" className="block" />
                         </div>
-                        <div className="text-sm text-text-muted">Annual cancer research funding*</div>
+                        <div className="text-sm text-text-muted">To cancer research funding</div>
                       </div>
                       <div>
-                        <div className="text-2xl font-bold text-[var(--primary)]">
-                          <AnimatedCounter targetValue="$1.8M" className="block" />
+                        <div className="text-3xl font-bold text-[var(--primary)]">
+                          <AnimatedCounter targetValue="50%" className="block" />
                         </div>
-                        <div className="text-sm text-text-muted">Token burns at scale*</div>
+                        <div className="text-sm text-text-muted">To token buyback & burn</div>
                       </div>
                       <div className="text-xs text-text-muted italic mt-4">
-                        *Based on $1M daily volume
+                        *Impact scales directly with trading volume
                       </div>
                     </div>
                   </CardContent>
