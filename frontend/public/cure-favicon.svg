@@ -4,6 +4,5 @@
   <circle cx="50" cy="50" r="46" stroke="rgb(142, 118, 255)" stroke-width="5" fill="none"/>
   <!-- Left half fill -->
   <path d="M50 8 A42 42 0 0 0 50 92 Z" fill="rgb(142, 118, 255)"/>
-  <!-- Divider line -->
-  <line x1="50" y1="8" x2="50" y2="92" stroke="#0B1220" stroke-width="5"/>
+  <!-- Right half is transparent (background shows through) -->
 </svg>
